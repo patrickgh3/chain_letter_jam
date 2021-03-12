@@ -9,10 +9,13 @@
 [node name="Control" parent="." instance=ExtResource( 3 )]
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
-position = Vector2( 325.785, 96.3278 )
+position = Vector2( 325.134, 149.504 )
 
 [node name="Background" type="Sprite" parent="."]
-position = Vector2( 321.91, 241.905 )
-scale = Vector2( 0.815736, 0.819411 )
+position = Vector2( 320, 240 )
+scale = Vector2( 0.8, 0.8 )
 z_index = -10
 texture = ExtResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}

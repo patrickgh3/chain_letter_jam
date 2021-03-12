@@ -8,9 +8,8 @@ var minus = false
 var control
 
 func _ready():
-	speed.y = -3
+	speed.y = -3.5
 	control = get_node("/root/Main/Control")
-	print(control)
 
 func _process(_delta):
 	var d = Vector2()
@@ -24,6 +23,11 @@ func _process(_delta):
 	if Input.is_action_pressed("ui_down") :
 		speed.y += 0.25
 		
+	# up
+	#if Input.is_action_pressed("ui_up") and speed.y > 0.5:
+	#	speed.y -= 0.25
+	#	if speed.y < 0.5:  speed.y = 0.5
+		
 	# gravity
 	speed.y += 0.07
 	
@@ -34,6 +38,7 @@ func _process(_delta):
 	if Input.is_action_just_pressed("jump") and djump:
 		speed.y = jump_speed
 		djump = false
+		control.play_random_sound_from_array(control.jump_sounds)
 	# release jump
 	if Input.is_action_just_released("jump") and speed.y < 0:
 		speed.y *= 0.5
@@ -46,6 +51,7 @@ func _process(_delta):
 	# switch plus and minus
 	if Input.is_action_just_pressed("action"):
 		minus = not minus
+		control.play_random_sound_from_array(control.jump_sounds)
 
 	# flip sprite
 	if speed.x > 0: $AnimatedSprite.flip_h = false

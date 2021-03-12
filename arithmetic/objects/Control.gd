@@ -1,9 +1,11 @@
 extends Node2D
 
-var t = 0
+var period = 40
+var t = period-1
 var total = 0
 var target
-var avoid
+var num_avoids = 2
+var avoids
 var score = 0
 var player
 
@@ -13,20 +15,31 @@ var rng = RandomNumberGenerator.new()
 var symbols_sprite = load("res://sprites/symbols.png")
 var score_text_sprite = load("res://sprites/score_text.png")
 
+var collect_sounds = [load("res://sounds/chalk1.wav"),
+	load("res://sounds/chalk2.wav"),
+	load("res://sounds/chalk3.wav"),
+	load("res://sounds/chalk4.wav")]
+var win_sounds = [load("res://sounds/chalk_win1.wav"),
+	load("res://sounds/chalk_win2.wav"),
+	load("res://sounds/chalk_win3.wav")]
+var lose_sounds = [load("res://sounds/chalk_lose1.wav"),
+	load("res://sounds/chalk_lose2.wav")]
+var jump_sounds = [load("res://sounds/chalk_jump.wav")]
+
 
 func _ready():
 	rng = RandomNumberGenerator.new()
 	rng.randomize()
 	reroll()
 	player = get_node("/root/Main/Player")
+	play_random_sound_from_array(jump_sounds)
 
 func _process(_delta):
 	t += 1
-	var period = 40
 	if t >= period:
 		t -= period
 		
-		var item = create(-16, rand_range(height/2, height), "res://objects/Item.tscn")
+		var item = create(-16, rand_range(height/2, height-16), "res://objects/Item.tscn")
 		var speed = 1.5
 		if randf() < 0.5:
 			item.speed.x = speed
@@ -36,28 +49,58 @@ func _process(_delta):
 	
 	# restart
 	if Input.is_action_just_pressed("restart"):
-		print("hi");
 		get_tree().reload_current_scene()
 		
-		
+	# toggle hard mode
+	if Input.is_action_just_pressed("hard_mode"):
+		Global.hard_mode = not Global.hard_mode
+		get_tree().reload_current_scene()
+
+
+
 func reroll():
 	target = score
-	avoid = score
 	while target == score:
 		target = rng.randi_range(-12, 12)
-	while avoid == score or avoid == target:
-		avoid = target + rng.randi_range(-3, 3)
+	
+	if Global.hard_mode:
+		avoids = [choose_from_array([target-3, target-2, target-1]),
+				  choose_from_array([target+1, target+2, target+3])]
+	else:
+		avoids = [choose_from_array([target-3, target-2, target-1,
+				  target+1, target+2, target+3])]
+	
 	update() # CanvasItem.update, so _draw gets called again
 		
 func add_number(n):
 	total += n
+	
+	var hit_avoid = false;
+	for avoid in avoids:
+		if total == avoid:
+			hit_avoid = true;
+			break;
+	
 	if total == target:
 		score += 1
 		reroll()
-	elif total == avoid:
+		play_random_sound_from_array(win_sounds)
+	elif hit_avoid:
 		player.queue_free()
+		play_random_sound_from_array(lose_sounds)
+	else:
+		play_random_sound_from_array(collect_sounds)
 	
 	update() # CanvasItem.update, so _draw gets called again
+	
+func play_random_sound_from_array(array):
+	$AudioStreamPlayer.stream = choose_from_array(array)
+	$AudioStreamPlayer.pitch_scale = rand_range(0.9, 1.1)
+	$AudioStreamPlayer.play()
+	
+func choose_from_array(array):
+	var i = rng.randi_range(0, array.size()-1)
+	return array[i]
 
 
 
@@ -70,7 +113,10 @@ func _draw():
 	
 	var s = width*0.12
 	draw_number(target, width/2-s, 32, 32, true)
-	draw_number(avoid, width/2+s, 32, 32, true, Color(1, 0, 0, 1))
+	var y = 32
+	for avoid in avoids:
+		draw_number(avoid, width/2+s, y, 32, true, Color(1, 0, 0, 1))
+		y += 32
 
 func draw_number(n, x, y, h, x_centered=false, color=Color(1,1,1,1)):
 	var n_string = String(n)

@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/chalk4.wav-438cff13903ea5df157f5e9db1487434.sample"
+
+[deps]
+
+source_file="res://sounds/chalk4.wav"
+dest_files=[ "res://.import/chalk4.wav-438cff13903ea5df157f5e9db1487434.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
